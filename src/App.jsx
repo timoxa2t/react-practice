@@ -35,12 +35,20 @@ export const App = () => {
 
   const filteredProducts = useMemo(
     () => products.filter(
-      product => (selectedUserId === null
-        || product.user.id === selectedUserId)
-      && (selectedCategories.length === 0
-        || selectedCategories.includes(product.categoryId))
-      && (query.trim() === ''
-        || product.name.toLowerCase().includes(query.trim().toLowerCase())),
+      (product) => {
+        const userIdFilter = selectedUserId === null
+          || product.user.id === selectedUserId;
+        const selectedCategoriesFilter = selectedCategories.length === 0
+          || selectedCategories.includes(product.categoryId);
+
+        const cleanQuery = query.trim().toLowerCase();
+        const queryFilter = cleanQuery === ''
+          || product.name.toLowerCase().includes(cleanQuery);
+
+        return userIdFilter
+          && selectedCategoriesFilter
+          && queryFilter;
+      },
     ),
     [products, selectedUserId, query, selectedCategories],
   );
