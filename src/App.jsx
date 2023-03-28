@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import usersFromServer from './api/users';
 import categoriesFromServer from './api/categories';
 import productsFromServer from './api/products';
+import { ProductList } from './components/ProductList/ProductList';
 
 const defaultProducts = productsFromServer.map((product) => {
   const copy = { ...product };
@@ -22,16 +23,25 @@ const defaultProducts = productsFromServer.map((product) => {
 export const App = () => {
   const [products] = useState(defaultProducts);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [query, setQuery] = useState('');
 
   const handleQueryChange = (event) => {
     setQuery(event.target.value);
   };
 
+  const handleResetAll = () => {
+    setQuery('');
+    setSelectedUserId(null);
+    setSelectedCategoryId(null);
+  };
+
   const filteredProducts = useMemo(
     () => products.filter(
       product => (selectedUserId === null
         || product.user.id === selectedUserId)
+      && (selectedCategoryId === null
+        || product.user.id === selectedCategoryId)
       && (query.trim() === ''
         || product.name.toLowerCase().includes(query.trim().toLowerCase())),
     ),
@@ -103,9 +113,19 @@ export const App = () => {
                 href="#/"
                 data-cy="AllCategories"
                 className="button is-success mr-6 is-outlined"
+                onClick={() => setSelectedCategoryId(null)}
               >
                 All
               </a>
+              {/* {categoriesFromServer.map(({ id, name }) => (
+                <a
+                  data-cy="Category"
+                  className="button mr-2 my-1 is-info"
+                  href="#/"
+                >
+                  Category 1
+                </a>
+              ))} */}
 
               <a
                 data-cy="Category"
@@ -144,6 +164,7 @@ export const App = () => {
                 data-cy="ResetAllButton"
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
+                onClick={handleResetAll}
               >
                 Reset all filters
               </a>
@@ -152,95 +173,14 @@ export const App = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No products matching selected criteria
-          </p>
+          {filteredProducts.length === 0
+            ? (
+              <p data-cy="NoMatchingMessage">
+                No products matching selected criteria
+              </p>
+            )
+            : <ProductList products={filteredProducts} /> }
 
-          <table
-            data-cy="ProductTable"
-            className="table is-striped is-narrow is-fullwidth"
-          >
-            <thead>
-              <tr>
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    ID
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Product
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort-down" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Category
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort-up" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    User
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredProducts.map(({
-                id,
-                name,
-                category,
-                user,
-              }) => (
-                <tr data-cy="Product">
-                  <td className="has-text-weight-bold" data-cy="ProductId">
-                    {id}
-                  </td>
-
-                  <td data-cy="ProductName">{name}</td>
-                  <td data-cy="ProductCategory">{`${category.icon} - ${category.title}`}</td>
-
-                  <td
-                    data-cy="ProductUser"
-                    className={
-                      user.sex === 'f'
-                        ? 'has-text-danger'
-                        : 'has-text-link'
-                    }
-                  >
-                    {user.name}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
