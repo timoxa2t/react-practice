@@ -88,9 +88,9 @@ export const ProductList = ({ products }) => {
                         {
                           'fa-sort': id !== sortType,
                           'fa-sort-down': id === sortType
-                            && sortOrder === SORT_ASC,
-                          'fa-sort-up': id === sortType
                             && sortOrder === SORT_DESC,
+                          'fa-sort-up': id === sortType
+                            && sortOrder === SORT_ASC,
                         },
                       )}
                     />
