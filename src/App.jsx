@@ -23,7 +23,7 @@ const defaultProducts = productsFromServer.map((product) => {
 export const App = () => {
   const [products] = useState(defaultProducts);
   const [selectedUserId, setSelectedUserId] = useState(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [query, setQuery] = useState('');
 
   const handleQueryChange = (event) => {
@@ -33,19 +33,35 @@ export const App = () => {
   const handleResetAll = () => {
     setQuery('');
     setSelectedUserId(null);
-    setSelectedCategoryId(null);
+    setSelectedCategories([]);
+  };
+
+  const handleCategoryToggle = (id) => {
+    const index = selectedCategories.indexOf(id);
+
+    if (index >= 0) {
+      setSelectedCategories([
+        ...selectedCategories.slice(0, index),
+        ...selectedCategories.slice(index + 1, selectedCategories.length),
+      ]);
+    } else {
+      setSelectedCategories([
+        ...selectedCategories,
+        id,
+      ]);
+    }
   };
 
   const filteredProducts = useMemo(
     () => products.filter(
       product => (selectedUserId === null
         || product.user.id === selectedUserId)
-      && (selectedCategoryId === null
-        || product.user.id === selectedCategoryId)
+      && (selectedCategories.length === 0
+        || selectedCategories.includes(product.categoryId))
       && (query.trim() === ''
         || product.name.toLowerCase().includes(query.trim().toLowerCase())),
     ),
-    [products, selectedUserId, query],
+    [products, selectedUserId, query, selectedCategories],
   );
 
   return (
@@ -69,6 +85,7 @@ export const App = () => {
 
               {usersFromServer.map(({ name, id }) => (
                 <a
+                  key={id}
                   data-cy="FilterUser"
                   href="#/"
                   className={classNames({ 'is-active': selectedUserId === id })}
@@ -112,51 +129,27 @@ export const App = () => {
               <a
                 href="#/"
                 data-cy="AllCategories"
-                className="button is-success mr-6 is-outlined"
-                onClick={() => setSelectedCategoryId(null)}
+                className={classNames('button is-success mr-6',
+                  { 'is-outlined': selectedCategories.length === 0 })
+                }
+                onClick={() => setSelectedCategories([])}
               >
                 All
               </a>
-              {/* {categoriesFromServer.map(({ id, name }) => (
+              {categoriesFromServer.map(({ id, title }) => (
                 <a
+                  key={id}
                   data-cy="Category"
-                  className="button mr-2 my-1 is-info"
+                  className={classNames(
+                    'button mr-2 my-1',
+                    { 'is-info': selectedCategories.includes(id) },
+                  )}
                   href="#/"
+                  onClick={() => handleCategoryToggle(id)}
                 >
-                  Category 1
+                  {title}
                 </a>
-              ))} */}
-
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 1
-              </a>
-
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Category 2
-              </a>
-
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 3
-              </a>
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Category 4
-              </a>
+              ))}
             </div>
 
             <div className="panel-block">
