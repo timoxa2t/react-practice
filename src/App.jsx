@@ -4,6 +4,7 @@ import './App.scss';
 import usersFromServer from './api/users';
 import categoriesFromServer from './api/categories';
 import productsFromServer from './api/products';
+import classNames from 'classnames';
 
 const defaultProducts = productsFromServer.map((product) => {
   const copy = { ...product };
@@ -20,8 +21,15 @@ const defaultProducts = productsFromServer.map((product) => {
 
 export const App = () => {
   const [products] = useState(defaultProducts);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
-  const filteredProducts = useMemo(() => products, [products]);
+  const filteredProducts = useMemo(
+    () => products.filter(
+      product => selectedUserId === null
+      || product.user.id === selectedUserId,
+    ),
+    [products, selectedUserId],
+  );
 
   return (
     <div className="section">
@@ -36,31 +44,22 @@ export const App = () => {
               <a
                 data-cy="FilterAllUsers"
                 href="#/"
+                className={classNames({ 'is-active': selectedUserId === null })}
+                onClick={() => setSelectedUserId(null)}
               >
                 All
               </a>
 
-              <a
-                data-cy="FilterUser"
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                data-cy="FilterUser"
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                data-cy="FilterUser"
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(({ name, id }) => (
+                <a
+                  data-cy="FilterUser"
+                  href="#/"
+                  className={classNames({ 'is-active': selectedUserId === id })}
+                  onClick={() => setSelectedUserId(id)}
+                >
+                  {name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
